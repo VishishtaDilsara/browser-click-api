@@ -26,7 +26,7 @@ app.post("/click", async (req, res) => {
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
 
     // wait a little in case redirect/page update happens
-    await page.waitForTimeout(3000);
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     const confirmSelector = 'button[data-uia="set-primary-location-action"]';
     const hasConfirmButton = await page.$(confirmSelector);
