@@ -5,12 +5,12 @@ const app = express();
 app.use(express.json());
 
 app.post("/click", async (req, res) => {
-  const { url } = req.body;
+  const { url, selector } = req.body;
 
-  if (!url) {
+  if (!url || !selector) {
     return res.status(400).json({
       ok: false,
-      error: "url is required",
+      error: "url and selector are required",
     });
   }
 
@@ -24,37 +24,20 @@ app.post("/click", async (req, res) => {
 
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
+    await page.waitForSelector(selector, { timeout: 15000 });
+    await page.click(selector);
 
-    // wait a little in case redirect/page update happens
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    const confirmSelector = 'button[data-uia="set-primary-location-action"]';
-    const hasConfirmButton = await page.$(confirmSelector);
-
-    if (hasConfirmButton) {
-      await page.click(confirmSelector);
-
-      await browser.close();
-      return res.json({
-        ok: true,
-        action: "clicked-confirm-button",
-        message: "Opened link and clicked confirm button",
-      });
-    }
-
-    await browser.close();
-    return res.json({
+    res.json({
       ok: true,
-      action: "direct-link-confirmed",
-      message: "Opened link and no second confirm button was needed",
+      message: "Button clicked successfully",
     });
   } catch (error) {
-    if (browser) await browser.close();
-
-    return res.status(500).json({
+    res.status(500).json({
       ok: false,
       error: error.message,
     });
+  } finally {
+    if (browser) await browser.close();
   }
 });
 
