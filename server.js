@@ -41,6 +41,10 @@ app.post("/click", async (req, res) => {
   }
 });
 
+app.get("/", (_req, res) => {
+  res.send("browser-click-api is running");
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
